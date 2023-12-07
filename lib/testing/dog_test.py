@@ -42,11 +42,14 @@ class TestDog:
         Session = sessionmaker(bind=engine)
         session = Session()
         
-        joey = Dog(name="joey", breed="cocker spaniel")
-        save(session, joey)
+        try:
+            joey = Dog(name="joey", breed="cocker spaniel")
+            save(session, joey)
 
-        assert session.query(Dog).first().name == 'joey'
-        assert session.query(Dog).first().breed == 'cocker spaniel'
+            assert session.query(Dog).first().name == 'joey'
+            assert session.query(Dog).first().breed == 'cocker spaniel'
+        finally:
+            session.close()
 
         os.remove(db_dir)
 
@@ -80,12 +83,15 @@ class TestDog:
         Session = sessionmaker(engine)
         session = Session()
         
-        dog = Dog(name="conan", breed="chihuahua")
-        session.add(dog)
-        session.commit()
-        
-        conan = find_by_name(session, 'conan')
-        assert(conan.name == 'conan')
+        try:
+            dog = Dog(name="conan", breed="chihuahua")
+            session.add(dog)
+            session.commit()
+            
+            conan = find_by_name(session, 'conan')
+            assert(conan.name == 'conan')
+        finally:
+            session.close()
 
         os.remove(db_dir)
 
@@ -97,14 +103,17 @@ class TestDog:
         Session = sessionmaker(engine)
         session = Session()
 
-        dog = Dog(name="conan", breed="chihuahua")
-        session.add(dog)
-        session.commit()
-        
-        dog_1 = find_by_id(session, dog.id)
-        assert dog_1.id == dog.id
-        assert dog_1.name == 'conan'
-        assert dog_1.breed == 'chihuahua'
+        try:
+            dog = Dog(name="conan", breed="chihuahua")
+            session.add(dog)
+            session.commit()
+            
+            dog_1 = find_by_id(session, dog.id)
+            assert dog_1.id == dog.id
+            assert dog_1.name == 'conan'
+            assert dog_1.breed == 'chihuahua'
+        finally:
+            session.close()
 
         os.remove(db_dir)
 
@@ -116,12 +125,15 @@ class TestDog:
         Session = sessionmaker(engine)
         session = Session() 
         
-        dog = Dog(name="fanny", breed="cockapoo")
-        session.add(dog)
-        session.commit()
-        
-        fanny = find_by_name_and_breed(session, 'fanny', 'cockapoo')
-        assert fanny.name == 'fanny' and fanny.breed == 'cockapoo'
+        try:
+            dog = Dog(name="fanny", breed="cockapoo")
+            session.add(dog)
+            session.commit()
+            
+            fanny = find_by_name_and_breed(session, 'fanny', 'cockapoo')
+            assert fanny.name == 'fanny' and fanny.breed == 'cockapoo'
+        finally:
+            session.close()
 
         os.remove(db_dir)
 
@@ -133,14 +145,17 @@ class TestDog:
         Session = sessionmaker(engine)
         session = Session() 
         
-        dog = Dog(name="joey", breed="cocker spaniel")
-        session.add(dog)
-        session.commit()
+        try:
+            dog = Dog(name="joey", breed="cocker spaniel")
+            session.add(dog)
+            session.commit()
 
-        joey = session.query(Dog).filter_by(name='joey').first()
-        update_breed(session, joey, 'bulldog')
-        updated_record = session.query(Dog).filter_by(name='joey').first()
+            joey = session.query(Dog).filter_by(name='joey').first()
+            update_breed(session, joey, 'bulldog')
+            updated_record = session.query(Dog).filter_by(name='joey').first()
+            assert updated_record.breed == 'bulldog'
+        finally:
+            session.close()
         
-        assert updated_record.breed == 'bulldog'
         
         os.remove(db_dir)
